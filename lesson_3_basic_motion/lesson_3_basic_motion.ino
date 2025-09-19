@@ -129,3 +129,23 @@ void drive(int duty_L, int duty_R) {
   analogWrite(pwmR, abs(duty_R)); 
 } 
 
+ // declaring v and w here limits their scope to loop() so there aren't conflicts with motor_controller() 
+  float v = 0.346;    // linear velocity (0.346 is forward full, -0.346 is back full) 
+  float w = 0;        // angular velocity (4.73 is rotate left full, -4.73 is rotate right full) 
+  motor_controller(v, w); 
+  delay(2000); 
+
+  v = -0.346; 
+  w = 0; 
+  motor_controller(v,w); 
+  delay(2000); 
+
+  v = 0; 
+  w = 4.73; 
+  motor_controller(v,w); 
+  delay(2000); 
+
+  v = 0; 
+  w = -4.73; 
+  motor_controller(v,w)
+  delay(2000); 
