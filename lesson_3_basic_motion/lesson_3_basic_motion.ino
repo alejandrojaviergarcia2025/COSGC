@@ -96,8 +96,36 @@ int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
 drive(duty_L, duty_R);
 }
 
-void drive(int duty_L, int duty_R) {
-  // based on PWM duty cycle setting, assigns motor driver pin values
-  // expects duty_L and duty_R to be between -255 and 255
+void drive(int duty_L, int duty_R) { 
+// based on PWM duty cycle setting, assigns motor driver pin values 
+// expects duty_L and duty_R to be between -255 and 255 
+  // left motor 
+  if (duty_L > 0) {  // left motor forward 
+    digitalWrite(L1, HIGH); 
+    digitalWrite(L2, LOW); 
+  } 
+  if (duty_L < 0) {  // left motor backward 
+    digitalWrite(L1, LOW); 
+    digitalWrite(L2, HIGH); 
+  } 
+  if (duty_L == 0) {  // left motor stop 
+    digitalWrite(L1, LOW); 
+    digitalWrite(L2, LOW); 
+  } 
+  // right motor 
+  if (duty_R > 0) {  // right motor forward 
+    digitalWrite(R1, HIGH); 
+    digitalWrite(R2, LOW); 
+  } 
+  if (duty_R < 0) {  // right motor backward 
+    digitalWrite(R1, LOW); 
+    digitalWrite(R2, HIGH); 
+  } 
+  if (duty_R == 0) {  // right motor stop 
+    digitalWrite(R1, LOW); 
+    digitalWrite(R2, LOW); 
+  } 
+  analogWrite(pwmL, abs(duty_L)); 
+  analogWrite(pwmR, abs(duty_R)); 
+} 
 
-}
