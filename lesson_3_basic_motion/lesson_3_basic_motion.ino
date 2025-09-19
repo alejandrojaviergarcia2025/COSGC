@@ -79,12 +79,20 @@ void motor_controller(float v, float w) {
   // maps required wheel speeds to PWM duty cycle
   // expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
   // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
+  
+  //use the constrain function to keep dphi_L and dphi_R within certain boundaries
+  //this prevents unintended behavior of the map function
 float dphi_L = (v/r) - (L * w)/(2 * r);
 float dphi_R = (v/r) + (L * w)/(2 * r);
+
+ //need to confirm map() behaves well when given non-int input
+  //map() uses integer math, returns only integers which is not a problem in this case
+  //would be a problem if it misbehaves with float input
 dphi_L = constrain(dphi_L, -11.52, 11.52);
 dphi_R = constrain(dphi_R, -11.52, 11.52);
 int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
 int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
+  
 drive(duty_L, duty_R);
 }
 
