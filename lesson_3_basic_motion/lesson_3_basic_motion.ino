@@ -79,7 +79,8 @@ void motor_controller(float v, float w) {
   // maps required wheel speeds to PWM duty cycle
   // expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
   // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
-
+float dphi_L = (v/r) - (L * w)/(2 * r);
+float dphi_R = (v/r) + (L * w)/(2 * r);
 }
 
 void drive(int duty_L, int duty_R) {
