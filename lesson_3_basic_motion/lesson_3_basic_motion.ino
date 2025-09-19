@@ -81,6 +81,11 @@ void motor_controller(float v, float w) {
   // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
 float dphi_L = (v/r) - (L * w)/(2 * r);
 float dphi_R = (v/r) + (L * w)/(2 * r);
+dphi_L = constrain(dphi_L, -11.52, 11.52);
+dphi_R = constrain(dphi_R, -11.52, 11.52);
+int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
+int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
+drive(duty_L, duty_R);
 }
 
 void drive(int duty_L, int duty_R) {
