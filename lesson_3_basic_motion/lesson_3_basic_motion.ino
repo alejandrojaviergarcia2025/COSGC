@@ -44,9 +44,24 @@ void loop() {
   // declaring v and w here limits their scope to loop() so there aren't conflicts with motor_controller()
   float v = 0.346;    // linear velocity (0.346 is forward full, -0.346 is back full)
   float w = 0;        // angular velocity (4.73 is rotate left full, -4.73 is rotate right full)
-  motor_controller(v, w);
-  delay(1000);
+  motor_controller(v, w); 
+  delay(2000); 
 
+  v = -0.346; 
+  w = 0; 
+  motor_controller(v,w); 
+  delay(2000); 
+
+  v = 0; 
+  w = 4.73; 
+  motor_controller(v,w); 
+  delay(2000); 
+
+  v = 0; 
+  w = -4.73; 
+  motor_controller(v,w); 
+  delay(2000);
+  
   // is a normal comment
   /* is a block comment */
 
@@ -79,21 +94,20 @@ void motor_controller(float v, float w) {
   // maps required wheel speeds to PWM duty cycle
   // expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
   // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
-  
+  float dphi_L = (v/r) - (L * w)/(2 * r);
+  float dphi_R = (v/r) + (L * w)/(2 * r);
   //use the constrain function to keep dphi_L and dphi_R within certain boundaries
   //this prevents unintended behavior of the map function
-float dphi_L = (v/r) - (L * w)/(2 * r);
-float dphi_R = (v/r) + (L * w)/(2 * r);
-
+  dphi_L = constrain(dphi_L, -11.52, 11.52);
+  dphi_R = constrain(dphi_R, -11.52, 11.52);
+  
  //need to confirm map() behaves well when given non-int input
   //map() uses integer math, returns only integers which is not a problem in this case
   //would be a problem if it misbehaves with float input
-dphi_L = constrain(dphi_L, -11.52, 11.52);
-dphi_R = constrain(dphi_R, -11.52, 11.52);
-int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
-int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
+  int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
+  int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
   
-drive(duty_L, duty_R);
+  drive(duty_L, duty_R);
 }
 
 void drive(int duty_L, int duty_R) { 
@@ -128,24 +142,3 @@ void drive(int duty_L, int duty_R) {
   analogWrite(pwmL, abs(duty_L)); 
   analogWrite(pwmR, abs(duty_R)); 
 } 
-
- // declaring v and w here limits their scope to loop() so there aren't conflicts with motor_controller() 
-  float v = 0.346;    // linear velocity (0.346 is forward full, -0.346 is back full) 
-  float w = 0;        // angular velocity (4.73 is rotate left full, -4.73 is rotate right full) 
-  motor_controller(v, w); 
-  delay(2000); 
-
-  v = -0.346; 
-  w = 0; 
-  motor_controller(v,w); 
-  delay(2000); 
-
-  v = 0; 
-  w = 4.73; 
-  motor_controller(v,w); 
-  delay(2000); 
-
-  v = 0; 
-  w = -4.73; 
-  motor_controller(v,w)
-  delay(2000); 
