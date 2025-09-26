@@ -105,7 +105,7 @@ void motor_controller(float v, float w) {
   //map() uses integer math, returns only integers which is not a problem in this case
   //would be a problem if it misbehaves with float input
   int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
-  int duty_R = map(dphi_R, -11.52, 11.52, -255, 2555);
+  int duty_R = map(dphi_R, -11.52, 11.52, -255, 255);
   
   drive(duty_L, duty_R);
 }
