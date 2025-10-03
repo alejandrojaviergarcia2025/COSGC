@@ -10,6 +10,7 @@ left and right directions referenced in comments are from the robot's perspectiv
 */ 
 
 // include the QuadratureEncoder library
+#include <QuadratureEncoder.h> 
 
 //--------------------rover geometry parameters--------------------
 // motor_controller() uses these parameters to calculate wheel velocities
@@ -30,21 +31,35 @@ const int pwmL = 3;  //PWMB -> D3
 
 //--------------------declare sensor pins--------------------
 // declare echo and trig pins for ultrasonic sensor
+const int echo = 11; // Echo  -> D11 
+const int trig = 12; // Trig  -> D12 
 
 // declare pin for infrared sensor
+const int ir = 13;  // OUT  -> D13 
+// declare a and b pins for encoders (can be analog pins) 
+// right encoder 
+const int a_r = A3; // A  -> A3 
+const int b_r = A2; // B  -> A2 
+// left encoder 
+const int a_l = A1; // A  -> A1 
+const int b_l = A0; // B  -> A0 
+// lets also create our encoder objects 
+Encoders right_encoder(a_r, b_r); 
+Encoders left_encoder(a_l, b_l); 
 
-// declare a and b pins for encoders (can be analog pins)
-// right encoder
-
-// left encoder
-
-// lets also create our encoder objects
-
+ 
 //--------------------set up FSM--------------------
+enum STATE {follow_right, turn_right, follow_left, turn_left, stop}; 
+STATE last_state; 
+STATE current_state = follow_right;   // give it a value so we can enter the switch:case on first loop 
+STATE next_state = current_state;     // give this a value so our switch:case behaves 
 
+ 
 void setup() {
   // put your setup code here, to run once:
-
+  pinMode(echo, INPUT); 
+  pinMode(trig, OUTPUT); 
+  
   Serial.begin(9600); // initialize the serial monitor so we can use it to check our work
 
   //--------------------setup motor pins--------------------
@@ -57,7 +72,7 @@ void setup() {
 
   //--------------------setup sensor pins--------------------
   // no need to setup our encoder pins, the library takes care of that
-
+  pinMode(ir, INPUT); 
 }
 
 void loop() {
@@ -78,7 +93,7 @@ void loop() {
   // if get_odom() grows much slower than you expect (0.346 m/s), try reversing the yellow/white signal wires of one encoder at a time
 
   // Put your FSM in here:
-  /* // FSM currently commented out so it doesn't interfere with sensor testing code
+   // FSM currently commented out so it doesn't interfere with sensor testing code
   switch (current_state) {
     case follow_right :
       break;
@@ -94,7 +109,6 @@ void loop() {
 
   // update states
 
-  */
 }
 
 
@@ -114,11 +128,16 @@ float get_distance() {
   float calculated_distance;   // var to store distance calculated from time of flight
 
   // send out an ultrasonic pulse thats 10ms long
-
+  digitalWrite(trig, HIGH); 
+  delayMicroseconds(10); 
+  digitalWrite(trig, LOW);
+  
   // use pulseIn function to see how long it takes for the pulse to return to the sensor
-
+  echo_time = pulseIn(echo, HIGH); 
+  
   // calculate distance using formula from ToF sensor section
-
+  return calculated_distance = (echo_time / 2) / (346 * 10);  
+  //*10 is to scale units appropriately since pulseIn returns in microseconds 
 }
 
 bool get_line() {
@@ -126,16 +145,19 @@ bool get_line() {
   // returns 1 (true) if reflection seen (over white surface)
   // this only works when the lipo was plugged in as well as the serial cable
   // the IR sensor NEEDS to be fed ~5V
-  
+  return !digitalRead(ir);
 }
 
 float get_odom() {
   // get encoder counts using getEncoderCount method from the Encoders class
-
+  long left_encoder_count = left_encoder.getEncoderCount(); 
+  long right_encoder_count = right_encoder.getEncoderCount(); 
   // find the angular position of our wheels
-
+  float left_wheel_pos = left_encoder_count * ((2 * 3.14) / 3575.04); 
+  float right_wheel_pos = right_encoder_count * ((2 * 3.14) / 3575.04); 
   // calculate the linear position of our robot from the angular position of the wheels
-
+  float odom = (r / 2) * (left_wheel_pos + right_wheel_pos); 
+  return odom; 
 }
 
 void motor_controller(float v, float w) {
