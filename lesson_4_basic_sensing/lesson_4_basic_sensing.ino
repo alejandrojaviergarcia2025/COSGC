@@ -1,5 +1,17 @@
 #include <QuadratureEncoder.h>
 
+/* 
+By Whit Whittall
+COSGC New Robotics Workshop code for lesson 4 basic sensing
+Verified to work using Robotics Workshop BOM hardware on 7/16/2024
+
+Adds three common hobby robotics sensors: ultrasonic time of flight, IR reflectance, and quadrature encoders
+Demonstrates use of finite state machine for robotic decision making
+
+left and right directions referenced in comments are from the robot's perspective
+*/ 
+
+// include the QuadratureEncoder library
 //--------------------rover geometry parameters--------------------
 // motor_controller() uses these parameters to calculate wheel velocities
 // get_odom() uses them to track distance travelled
