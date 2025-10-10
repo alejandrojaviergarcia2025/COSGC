@@ -1,4 +1,4 @@
-/#include <QuadratureEncoder.h>
+#include <QuadratureEncoder.h>
 
 //--------------------rover geometry parameters--------------------
 // motor_controller() uses these parameters to calculate wheel velocities
