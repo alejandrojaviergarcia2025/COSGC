@@ -59,8 +59,7 @@ STATE next_state = current_state;     // give this a value so our switch:case be
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(echo, INPUT); 
-  pinMode(trig, OUTPUT); 
+ 
   Serial.begin(9600); // initialize the serial monitor so we can use it to check our work
 
   //--------------------setup motor pins--------------------
@@ -73,11 +72,28 @@ void setup() {
 
   //--------------------setup sensor pins--------------------
   // no need to setup our encoder pins, the library takes care of that
+  pinMode(echo, INPUT); 
+  pinMode(trig, OUTPUT);
   pinMode(ir, INPUT); 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  // put your main code here, to run repeatedly:
+
+  // uncomment to test get_distance()
+  Serial.println(get_distance());
+  delay(1000);
+
+  // uncomment to test get_line()
+  Serial.println(get_line());
+
+  // uncomment to test get_odom()
+  motor_controller(0.346, 0);
+  delay(2000);
+  Serial.println(get_odom()); // returns in meters
+  // if get_odom() returns negative numbers, try reversing the yellow/white signal wires of both encoders
+  // if get_odom() grows much slower than you expect (0.346 m/s), try reversing the yellow/white signal wires of one encoder at a time
 
   // FSM logic
   switch (current_state) {
@@ -217,52 +233,58 @@ float get_odom() {
 }
 
 void motor_controller(float v, float w) {
-  // determines required wheel speeds (in rad/s) based on linear and angular velocities (m/s, rad/s)
-  // maps required wheel speeds to PWM duty cycle
-  // expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
-  // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
+// determines required wheel speeds (in rad/s) based on linear and angular velocities (m/s, rad/s)
+// maps required wheel speeds to PWM duty cycle
+// expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
+// motors will saturate if desired velocity vector is too large, best to keep desired velocities low
+
   float dphi_L = (v/r) - (L * w)/(2 * r);
   float dphi_R = (v/r) + (L * w)/(2 * r);
+
   // use the constrain function to keep dphi_L and dphi_R within certain boundaries
   // this prevents unintended behavior of the map function
   dphi_L = constrain(dphi_L, -11.52, 11.52);
   dphi_R = constrain(dphi_R, -11.52, 11.52);
-  
+
+  // need to confirm map() behaves well when given non-int input
   // map() uses integer math, returns only integers which is not a problem in this case
+  // would be a problem if it misbehaves with float input
   int duty_L = map(dphi_L, -11.52, 11.52, -255, 255);
   int duty_R = map(dphi_R, -11.52, 11.52, -255, 255);
-  
+
   drive(duty_L, duty_R);
 }
 
-void drive(int duty_L, int duty_R) { 
-  // based on PWM duty cycle setting, assigns motor driver pin values 
-  // expects duty_L and duty_R to be between -255 and 255 
+void drive(int duty_L, int duty_R) {
+// based on PWM duty cycle setting, assigns motor driver pin values
+// expects duty_L and duty_R to be between -255 and 255
 
-  // left motor 
-  if (duty_L > 0) {  // left motor forward 
-    digitalWrite(L1, HIGH); 
-    digitalWrite(L2, LOW); 
-  } else if (duty_L < 0) {  // left motor backward 
-    digitalWrite(L1, LOW); 
-    digitalWrite(L2, HIGH); 
-  } else {  // left motor stop 
-    digitalWrite(L1, LOW); 
-    digitalWrite(L2, LOW); 
-  } 
-
-  // right motor 
-  if (duty_R > 0) {  // right motor forward 
-    digitalWrite(R1, HIGH); 
-    digitalWrite(R2, LOW); 
-  } else if (duty_R < 0) {  // right motor backward 
-    digitalWrite(R1, LOW); 
-    digitalWrite(R2, HIGH); 
-  } else {  // right motor stop 
-    digitalWrite(R1, LOW); 
-    digitalWrite(R2, LOW); 
-  } 
-
-  analogWrite(pwmL, abs(duty_L)); 
-  analogWrite(pwmR, abs(duty_R)); 
+  // left motor
+  if (duty_L > 0) {  // left motor forward
+    digitalWrite(L1, HIGH);
+    digitalWrite(L2, LOW);
+  }
+  if (duty_L < 0) {  // left motor backward
+    digitalWrite(L1, LOW);
+    digitalWrite(L2, HIGH);
+  }
+  if (duty_L == 0) {  // left motor stop
+    digitalWrite(L1, LOW);
+    digitalWrite(L2, LOW);
+  }
+  // right motor
+  if (duty_R > 0) {  // right motor forward
+    digitalWrite(R1, HIGH);
+    digitalWrite(R2, LOW);
+  }
+  if (duty_R < 0) {  // right motor backward
+    digitalWrite(R1, LOW);
+    digitalWrite(R2, HIGH);
+  }
+  if (duty_R == 0) {  // right motor stop
+    digitalWrite(R1, LOW);
+    digitalWrite(R2, LOW);
+  }
+  analogWrite(pwmL, abs(duty_L));
+  analogWrite(pwmR, abs(duty_R));
 }
