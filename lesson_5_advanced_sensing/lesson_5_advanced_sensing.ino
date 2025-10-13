@@ -13,8 +13,13 @@ left and right directions referenced in comments are from the robot's perspectiv
 #include <QuadratureEncoder.h>
 
 // include communications libraries
+#include <Adafruit_ICM20X.h>
+#include <Adafruit_ICM20948.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h> // A4 es SDA, A5 es SCL
 
 // create icm object from ICM20948 class
+Adafruit_ICM20948 icm;
 
 //--------------------rover geometry parameters--------------------
 // motor_controller() uses these parameters to calculate wheel velocities
@@ -80,48 +85,71 @@ void setup() {
   // no need to setup our encoder pins, the library takes care of that
 
   //--------------------set up ICM20948 IMU--------------------
+  Serial.begin(115200);
 
+  while (!Serial) {
+    delay(10);
+  }
+  
+  Serial.println("Adafruit ICM20948 test"); 
+  // try to initialize 
+  if (!icm.begin_I2C()) { 
+    Serial.println("failed to find ICM20948 chip"); 
+    while (1) { // enter infinite loop if chip is not found 
+      delay(10); 
+    } 
+  } 
+  Serial.println("ICM20948 found"); 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
-  // uncomment to test get_angle_mag()
-  //Serial.println(get_angle_mag());
-  //delay(1000);
-
-  // uncomment to test get_pitch()
-  //Serial.println(get_pitch());
-  //delay(1000);
-
-  // uncomment to test get_angle_odom()
-  /*
-  while(get_angle_odom() < 90) {
-    Serial.println(get_angle_odom()); 
-    motor_controller(0, 2);
-  }
-  motor_controller(0, 0);
-  */
-
-  // Put your FSM in here:
-  /*
   switch (current_state) {
-    case drive_forward :
-      // check for events
-      // perform actions
-    case turn_right :
-      // check for events
-      // perform actions
+    case drive_forward:
+      if (get_distance() < 0.1) {
+        next_state = turn_right;
+        reset_odom();
+      } else if (last_state == turn_right && abs(get_angle_odom()) < 3) {
+        next_state = turn_left;
+      } else {
+        next_state = drive_forward;
+      }
+
+      motor_controller(0.2, 0); 
       break;
-    case turn_left :
-      // check for events
-      // perform actions
+
+    case turn_right:
+      if (abs(get_angle_odom() + 90) < 3) {
+        next_state = drive_forward;
+        reset_odom();
+
+        while (get_odom() < 0.2) {
+          motor_controller(0.2, 0);
+        }
+      } else {
+        next_state = turn_right;
+      }
+
+      motor_controller(0, 2); 
+      break;
+
+    case turn_left:
+      if (abs(get_angle_odom()) < 3) {
+        if (get_distance() < 0.1) {
+          next_state = turn_right;
+          reset_odom();
+        } else {
+          next_state = drive_forward;
+        }
+      } else {
+        next_state = turn_left;
+      }
+
+      motor_controller(0, -2);
       break;
   }
 
   last_state = current_state;
   current_state = next_state;
-  */
 }
 
 
@@ -138,17 +166,30 @@ void loop() {
 float get_angle_mag() {
   // attempts to find the magnetic heading of the robot using ICM20948 IMU magnetometer
   // get a new normalized sensor event
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t mag;
+  sensors_event_t temp;
+  
+  icm.getEvent(&accel, &gyro, &temp, &mag);
 
   // determine angular position
-
+  float angle = atan2(-mag.magnetic.y, mag.magnetic.x) * RAD_TO_DEG;
+  return angle;
 }
 
 float get_pitch() {
   // finds the pitch of the robot using ICM20948 IMU accelerometer
   // get a new normalized sensor event
-
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t mag;
+  sensors_event_t temp;
+  
+  icm.getEvent(&accel, &gyro, &temp, &mag);
   // determine angular position
-
+  float angle = atan2(-accel.acceleration.y, accel.acceleration.x) * RAD_TO_DEG;
+  return angle;
 }
 
 float get_angle_odom() {
