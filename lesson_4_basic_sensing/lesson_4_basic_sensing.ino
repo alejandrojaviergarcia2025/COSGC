@@ -110,15 +110,15 @@ void loop() {
 
       // perform set of actions
       if (get_line()) {             // if robot sees the line
-        motor_controller(0.1, -0.5);  // slowly forward, turning right
+        motor_controller(0.1, -1);  // slowly forward, turning right
       } else {                      // if robot DOES NOT see the line
-        motor_controller(0.1, 0.5);   // slowly forward, turning left
+        motor_controller(0.1, 1);   // slowly forward, turning left
       }
       break;
 
     case turn_right:
       // perform set of actions
-      motor_controller(0, -2.5); // turn in place
+      motor_controller(0, -3); // turn in place
       if (last_state != turn_right) { // debouncer to make sure we actually turn around
         delay(500); // will need to play with this value for effective debouncing ** FIX
       }
@@ -143,15 +143,15 @@ void loop() {
 
       // perform set of actions
       if (get_line()) {
-        motor_controller(0.1, 0.5); // slowly forward, turning left
+        motor_controller(0.1, 1); // slowly forward, turning left
       } else {
-        motor_controller(0.1, -0.5); // slowly forward, turning right
+        motor_controller(0.1, -1); // slowly forward, turning right
       }
       break;
 
     case turn_left:
       // perform set of actions
-      motor_controller(0, 2.5); // turn in place
+      motor_controller(0, 3); // turn in place
       if (last_state != turn_left) {
         delay(500); // debouncer ** FIX
       }
