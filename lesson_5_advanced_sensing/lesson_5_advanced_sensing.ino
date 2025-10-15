@@ -103,12 +103,35 @@ void setup() {
 }
 
 void loop() {
+  // put your main code here, to run repeatedly:
+
+  // uncomment to test get_angle_mag()
+  Serial.println(get_angle_mag());
+  delay(1000);
+
+  // uncomment to test get_pitch()
+  Serial.println(get_pitch());
+  delay(1000);
+
+  // uncomment to test get_angle_odom()
+  
+  while(get_angle_odom() < 90) {
+    Serial.println(get_angle_odom()); 
+    motor_controller(0, 2);
+  }
+  motor_controller(0, 0);
+  
+
+  // Put your FSM in here:
   switch (current_state) {
     case drive_forward:
       if (get_distance() < 0.1) {
         next_state = turn_right;
         reset_odom();
-      } else if (last_state == turn_right && abs(get_angle_odom()) < 3) {
+      } else if (last_state == turn_right) {
+          while(get_dom() < 0.2){
+            motor_controller(0.2, 0); 
+          }
         next_state = turn_left;
       } else {
         next_state = drive_forward;
@@ -121,10 +144,6 @@ void loop() {
       if (abs(get_angle_odom() + 90) < 3) {
         next_state = drive_forward;
         reset_odom();
-
-        while (get_odom() < 0.2) {
-          motor_controller(0.2, 0);
-        }
       } else {
         next_state = turn_right;
       }
@@ -190,6 +209,11 @@ float get_pitch() {
   // determine angular position
   float angle = atan2(-accel.acceleration.y, accel.acceleration.x) * RAD_TO_DEG;
   return angle;
+}
+
+void reset_odom() {
+  right_encoder.setEncoderCount(0);
+  left_encoder.setEncoderCount(0);
 }
 
 float get_angle_odom() {
