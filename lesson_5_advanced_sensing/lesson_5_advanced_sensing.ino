@@ -106,7 +106,7 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   // uncomment to test get_angle_mag()
-  Serial.println(get_angle_mag());
+  /*Serial.println(get_angle_mag());
   delay(1000);
 
   // uncomment to test get_pitch()
@@ -120,7 +120,7 @@ void loop() {
     motor_controller(0, 2);
   }
   motor_controller(0, 0);
-  
+  */
 
   // Put your FSM in here:
   switch (current_state) {
@@ -129,7 +129,7 @@ void loop() {
         next_state = turn_right;
         reset_odom();
       } else if (last_state == turn_right) {
-          while(get_dom() < 0.2){
+          while(get_odom() < 0.2){
             motor_controller(0.2, 0); 
           }
         next_state = turn_left;
