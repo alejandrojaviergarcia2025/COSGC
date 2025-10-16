@@ -104,7 +104,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  Serial.println(get_angle_odom());
   // uncomment to test get_angle_mag()
   /*Serial.println(get_angle_mag());
   delay(1000);
@@ -132,7 +132,6 @@ void loop() {
       } else if (last_state == turn_right) {
           while(get_odom() < 0.2){
             motor_controller(0.2, 0); 
-            delay(10);
           }
         motor_controller(0, 0);
         reset_odom();
@@ -144,8 +143,8 @@ void loop() {
       break;
 
     case turn_right:
-      motor_controller(0, -2); 
-      if (abs(get_angle_odom() - 90) < 3) {
+      motor_controller(0, -3); 
+      if (abs(get_angle_odom() + 45) < 1.5) {
         motor_controller(0, 0);
         next_state = drive_forward;
         reset_odom();
@@ -155,8 +154,8 @@ void loop() {
       break;
 
     case turn_left:
-      motor_controller(0, 2);
-      if (abs(get_angle_odom() + 90) < 3) {
+      motor_controller(0, 2.5);
+      if (abs(get_angle_odom() - 45 ) < 1.5) {
          motor_controller(0, 0);
          reset_odom();
         if (get_distance() < 0.1) {
@@ -232,6 +231,13 @@ float get_angle_odom() {
   float right_wheel_pos = right_encoder_count * ((2 * 3.14) / 3575.04);
 
   float heading = (r / L) * (right_wheel_pos - left_wheel_pos) * RAD_TO_DEG;
+  Serial.print("L: ");
+  Serial.print(left_wheel_pos);
+  Serial.print("  R: ");
+  Serial.print(right_wheel_pos);
+  Serial.print("  Heading: ");
+  Serial.println(heading);
+
   return heading;
 }
 
