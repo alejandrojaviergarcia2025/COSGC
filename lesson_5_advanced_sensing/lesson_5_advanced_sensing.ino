@@ -132,8 +132,10 @@ void loop() {
       } else if (last_state == turn_right) {
           while(get_odom() < 0.2){
             motor_controller(0.2, 0); 
+            delay(10);
           }
         motor_controller(0, 0);
+        reset_odom();
         next_state = turn_left;
       } else {
         motor_controller(0.2, 0); 
@@ -143,7 +145,7 @@ void loop() {
 
     case turn_right:
       motor_controller(0, -2); 
-      if (abs(get_angle_odom() + 90) < 3) {
+      if (abs(get_angle_odom() - 90) < 3) {
         motor_controller(0, 0);
         next_state = drive_forward;
         reset_odom();
@@ -154,7 +156,7 @@ void loop() {
 
     case turn_left:
       motor_controller(0, 2);
-      if (abs(get_angle_odom()) < 3) {
+      if (abs(get_angle_odom() + 90) < 3) {
          motor_controller(0, 0);
          reset_odom();
         if (get_distance() < 0.1) {
